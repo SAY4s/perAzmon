@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>آزمون آنلاین</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg:        #f7f5f2;
+    --surface:   #ffffff;
+    --ink:       #1f2430;
+    --muted:     #6b7280;
+    --primary:   #2f6f4f;   /* سبز تیره — اعتماد و آرامش */
+    --primary-d: #244f3a;
+    --accent:    #c9622a;   /* نارنجی سوخته — برای تمرکز روی CTA */
+    --danger:    #b3432f;
+    --success:   #2f6f4f;
+    --border:    #e5e1da;
+    --radius:    14px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Vazirmatn', Tahoma, sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    min-height: 100vh;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  #app {
+    max-width: 480px;
+    margin: 0 auto;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .screen {
+    display: none;
+    flex: 1;
+    flex-direction: column;
+    padding: 1.5rem 1.25rem 2rem;
+    animation: fadeIn .35s ease;
+  }
+  .screen.active { display: flex; }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── Header ── */
+  .app-header {
+    text-align: center;
+    margin-bottom: 1.75rem;
+  }
+  .app-header .eyebrow {
+    font-size: .78rem;
+    font-weight: 600;
+    letter-spacing: .04em;
+    color: var(--primary);
+    text-transform: uppercase;
+    margin-bottom: .35rem;
+  }
+  .app-header h1 {
+    font-size: 1.5rem;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+  }
+  .app-header p {
+    color: var(--muted);
+    font-size: .9rem;
+    margin-top: .35rem;
+    line-height: 1.6;
+  }
+
+  /* ── Form ── */
+  .field {
+    margin-bottom: 1.1rem;
+  }
+  .field label {
+    display: block;
+    font-size: .82rem;
+    font-weight: 600;
+    color: var(--ink);
+    margin-bottom: .4rem;
+  }
+  .field input {
+    width: 100%;
+    padding: .85rem 1rem;
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface);
+    font-family: inherit;
+    font-size: .95rem;
+    color: var(--ink);
+    outline: none;
+    transition: border-color .2s, box-shadow .2s;
+  }
+  .field input:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(47,111,79,0.12);
+  }
+  .field input::placeholder { color: #b3aea3; }
+  .field .hint {
+    font-size: .76rem;
+    color: var(--muted);
+    margin-top: .35rem;
+  }
+  .field .error-msg {
+    font-size: .78rem;
+    color: var(--danger);
+    margin-top: .35rem;
+    display: none;
+  }
+  .field.has-error input { border-color: var(--danger); }
+  .field.has-error .error-msg { display: block; }
+
+  /* ── Buttons ── */
+  .btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: .5rem;
+    width: 100%;
+    padding: .95rem 1.25rem;
+    border: none;
+    border-radius: var(--radius);
+    font-family: inherit;
+    font-size: .98rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform .15s, opacity .15s;
+  }
+  .btn:active { transform: scale(0.98); }
+  .btn:disabled { opacity: .5; cursor: not-allowed; }
+  .btn-primary {
+    background: var(--primary);
+    color: #fff;
+  }
+  .btn-primary:active:not(:disabled) { background: var(--primary-d); }
+  .btn-outline {
+    background: transparent;
+    border: 1.5px solid var(--border);
+    color: var(--ink);
+  }
+
+  .form-footer { margin-top: auto; padding-top: 1.5rem; }
+
+  /* ── Quiz Progress ── */
+  .quiz-progress {
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+    margin-bottom: 1.5rem;
+  }
+  .progress-track {
+    flex: 1;
+    height: 6px;
+    background: var(--border);
+    border-radius: 999px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: var(--primary);
+    border-radius: 999px;
+    transition: width .35s ease;
+  }
+  .progress-label {
+    font-size: .8rem;
+    font-weight: 700;
+    color: var(--muted);
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* ── Question Card ── */
+  .question-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.5rem 1.25rem;
+    margin-bottom: 1.25rem;
+  }
+  .question-text {
+    font-size: 1.08rem;
+    font-weight: 700;
+    line-height: 1.7;
+  }
+
+  .choices { display: flex; flex-direction: column; gap: .65rem; flex: 1; }
+  .choice-btn {
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+    width: 100%;
+    text-align: right;
+    padding: .9rem 1rem;
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    font-family: inherit;
+    font-size: .92rem;
+    color: var(--ink);
+    cursor: pointer;
+    transition: border-color .15s, background .15s, transform .1s;
+  }
+  .choice-btn:active { transform: scale(0.99); }
+  .choice-marker {
+    flex-shrink: 0;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    border: 1.5px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: .78rem;
+    font-weight: 700;
+    color: var(--muted);
+  }
+  .choice-btn.selected {
+    border-color: var(--primary);
+    background: rgba(47,111,79,0.06);
+  }
+  .choice-btn.selected .choice-marker {
+    border-color: var(--primary);
+    background: var(--primary);
+    color: #fff;
+  }
+  .choice-btn.correct {
+    border-color: var(--success);
+    background: rgba(47,111,79,0.08);
+  }
+  .choice-btn.correct .choice-marker {
+    border-color: var(--success);
+    background: var(--success);
+    color: #fff;
+  }
+  .choice-btn.wrong {
+    border-color: var(--danger);
+    background: rgba(179,67,47,0.07);
+  }
+  .choice-btn.wrong .choice-marker {
+    border-color: var(--danger);
+    background: var(--danger);
+    color: #fff;
+  }
+  .choice-btn:disabled { cursor: default; }
+
+  .quiz-footer { margin-top: 1.25rem; }
+
+  /* ── Result Screen ── */
+  .result-hero {
+    text-align: center;
+    padding: 2.5rem 1rem 2rem;
+  }
+  .result-score {
+    font-size: 3.2rem;
+    font-weight: 800;
+    color: var(--primary);
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+  }
+  .result-score span { font-size: 1.4rem; color: var(--muted); font-weight: 600; }
+  .result-label {
+    font-size: .95rem;
+    color: var(--muted);
+    margin-top: .5rem;
+  }
+  .result-message {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.1rem 1.25rem;
+    margin-top: 1.5rem;
+    font-size: .9rem;
+    line-height: 1.7;
+    color: var(--ink);
+  }
+
+  /* ── Loading ── */
+  .spinner {
+    width: 22px; height: 22px;
+    border: 2.5px solid rgba(255,255,255,.35);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: spin .7s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ── Toast ── */
+  #toast {
+    position: fixed;
+    bottom: 1.5rem;
+    left: 50%;
+    transform: translateX(-50%) translateY(70px);
+    background: var(--ink);
+    color: #fff;
+    padding: .75rem 1.25rem;
+    border-radius: 10px;
+    font-size: .85rem;
+    z-index: 999;
+    transition: transform .35s cubic-bezier(.34,1.56,.64,1);
+    max-width: 90%;
+    text-align: center;
+  }
+  #toast.show { transform: translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+
+<div id="app">
+
+  <!-- ════════════════════════════════════════
+       صفحه‌ی ۱ — فرم ثبت‌نام
+  ════════════════════════════════════════ -->
+  <div class="screen active" id="screen-register">
+    <div class="app-header">
+      <div class="eyebrow">مرحله ۱ از ۲</div>
+      <h1>ثبت‌نام در آزمون</h1>
+      <p>برای شروع آزمون، لطفاً اطلاعات زیر را تکمیل کنید.</p>
+    </div>
+
+    <form id="register-form" novalidate>
+      <div class="field" id="field-first-name">
+        <label for="first-name">نام</label>
+        <input type="text" id="first-name" placeholder="مثلاً: علی" autocomplete="off" />
+        <div class="error-msg">نام را وارد کنید.</div>
+      </div>
+
+      <div class="field" id="field-last-name">
+        <label for="last-name">نام خانوادگی</label>
+        <input type="text" id="last-name" placeholder="مثلاً: رضایی" autocomplete="off" />
+        <div class="error-msg">نام خانوادگی را وارد کنید.</div>
+      </div>
+
+      <div class="field" id="field-national-id">
+        <label for="national-id">کد ملی</label>
+        <input type="text" id="national-id" placeholder="مثلاً: ۰۰۱۲۳۴۵۶۷۸" inputmode="numeric" autocomplete="off" maxlength="10" />
+        <div class="hint">کد ملی باید ۱۰ رقم باشد.</div>
+        <div class="error-msg">کد ملی معتبر وارد کنید (۱۰ رقم).</div>
+      </div>
+
+      <div class="form-footer">
+        <button type="submit" class="btn btn-primary" id="register-btn">
+          شروع آزمون
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <!-- ════════════════════════════════════════
+       صفحه‌ی ۲ — آزمون
+  ════════════════════════════════════════ -->
+  <div class="screen" id="screen-quiz">
+    <div class="quiz-progress">
+      <span class="progress-label" id="progress-label">۱ / ۵</span>
+      <div class="progress-track">
+        <div class="progress-fill" id="progress-fill" style="width:0%"></div>
+      </div>
+    </div>
+
+    <div class="question-card">
+      <div class="question-text" id="question-text">در حال بارگذاری سؤال...</div>
+    </div>
+
+    <div class="choices" id="choices-container">
+      <!-- گزینه‌ها داینامیک با JS ساخته می‌شوند -->
+    </div>
+
+    <div class="quiz-footer">
+      <button class="btn btn-primary" id="next-btn" disabled>
+        سؤال بعدی
+      </button>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════
+       صفحه‌ی ۳ — نتیجه
+  ════════════════════════════════════════ -->
+  <div class="screen" id="screen-result">
+    <div class="result-hero">
+      <div class="result-score" id="result-score">۰<span>/۰</span></div>
+      <div class="result-label">پاسخ صحیح از کل سؤالات</div>
+    </div>
+
+    <div class="result-message" id="result-message">
+      در حال ارسال نتیجه...
+    </div>
+
+    <div class="form-footer">
+      <button class="btn btn-primary" id="finish-btn">
+        <span id="finish-label">ارسال نتیجه و پایان</span>
+        <span class="spinner" id="finish-spinner" style="display:none;"></span>
+      </button>
+    </div>
+  </div>
+
+</div>
+
+<div id="toast"></div>
+
+<script>
+/* ═══════════════════════════════════════════════
+   راه‌اندازی Telegram WebApp SDK
+═══════════════════════════════════════════════ */
+const tg = window.Telegram?.WebApp;
+if (tg) {
+  tg.ready();
+  tg.expand();
+}
+
+/* اطلاعات تلگرام کاربر — مستقیم از initDataUnsafe خوانده می‌شود */
+function getTelegramUser() {
+  const unsafe = tg?.initDataUnsafe;
+  const user = unsafe?.user;
+  return {
+    telegram_id: user?.id || null,
+    username:    user?.username || null,
+    first_name_tg: user?.first_name || null,
+  };
+}
+
+/* ═══════════════════════════════════════════════
+   وضعیت کلی برنامه
+═══════════════════════════════════════════════ */
+const state = {
+  registration: null,   // { first_name, last_name, national_id, telegram_id, username }
+  questions:    [],
+  currentIndex: 0,
+  selectedIndex: null,
+  answers:      [],      // آرایه‌ای از true/false برای هر سؤال
+};
+
+/* ═══════════════════════════════════════════════
+   ابزارهای کمکی UI
+═══════════════════════════════════════════════ */
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+/* تبدیل ارقام فارسی/عربی به انگلیسی برای اعتبارسنجی کد ملی */
+function toEnglishDigits(str) {
+  const persian = '۰۱۲۳۴۵۶۷۸۹';
+  const arabic  = '٠١٢٣٤٥٦٧٨٩';
+  return str.replace(/[۰-۹٠-٩]/g, (d) => {
+    let idx = persian.indexOf(d);
+    if (idx === -1) idx = arabic.indexOf(d);
+    return idx !== -1 ? idx : d;
+  });
+}
+
+/* ═══════════════════════════════════════════════
+   صفحه‌ی ۱ — اعتبارسنجی و ثبت‌نام
+═══════════════════════════════════════════════ */
+function setFieldError(fieldId, hasError) {
+  document.getElementById(fieldId).classList.toggle('has-error', hasError);
+}
+
+document.getElementById('register-form').addEventListener('submit', function (e) {
+  e.preventDefault();
+
+  const firstName  = document.getElementById('first-name').value.trim();
+  const lastName   = document.getElementById('last-name').value.trim();
+  let nationalId   = document.getElementById('national-id').value.trim();
+  nationalId = toEnglishDigits(nationalId);
+
+  let hasError = false;
+
+  if (!firstName) { setFieldError('field-first-name', true); hasError = true; }
+  else { setFieldError('field-first-name', false); }
+
+  if (!lastName) { setFieldError('field-last-name', true); hasError = true; }
+  else { setFieldError('field-last-name', false); }
+
+  const idValid = /^\d{10}$/.test(nationalId);
+  if (!idValid) { setFieldError('field-national-id', true); hasError = true; }
+  else { setFieldError('field-national-id', false); }
+
+  if (hasError) return;
+
+  const tgUser = getTelegramUser();
+
+  state.registration = {
+    first_name:  firstName,
+    last_name:   lastName,
+    national_id: nationalId,
+    telegram_id: tgUser.telegram_id,
+    username:    tgUser.username,
+  };
+
+  startQuiz();
+});
+
+/* ═══════════════════════════════════════════════
+   صفحه‌ی ۲ — منطق آزمون
+═══════════════════════════════════════════════ */
+async function startQuiz() {
+  try {
+    const res = await fetch('questions.json', { cache: 'no-store' });
+    if (!res.ok) throw new Error('خطا در دریافت سؤالات');
+    state.questions = await res.json();
+  } catch (err) {
+    console.error(err);
+    showToast('❌ خطا در بارگذاری سؤالات. لطفاً دوباره تلاش کنید.');
+    return;
+  }
+
+  if (!state.questions.length) {
+    showToast('⚠️ هیچ سؤالی برای نمایش وجود ندارد.');
+    return;
+  }
+
+  state.currentIndex = 0;
+  state.answers = [];
+  showScreen('screen-quiz');
+  renderQuestion();
+}
+
+function renderQuestion() {
+  const q = state.questions[state.currentIndex];
+  state.selectedIndex = null;
+
+  document.getElementById('question-text').textContent = q.question;
+
+  const total = state.questions.length;
+  const current = state.currentIndex + 1;
+  document.getElementById('progress-label').textContent = `${toPersianDigits(current)} / ${toPersianDigits(total)}`;
+  document.getElementById('progress-fill').style.width = `${(current / total) * 100}%`;
+
+  const container = document.getElementById('choices-container');
+  container.innerHTML = '';
+
+  const letters = ['الف', 'ب', 'پ', 'ت'];
+
+  q.choices.forEach((choiceText, idx) => {
+    const btn = document.createElement('button');
+    btn.className = 'choice-btn';
+    btn.type = 'button';
+    btn.innerHTML = `<span class="choice-marker">${letters[idx]}</span><span>${escapeHtml(choiceText)}</span>`;
+    btn.addEventListener('click', () => selectChoice(idx));
+    container.appendChild(btn);
+  });
+
+  document.getElementById('next-btn').disabled = true;
+  const isLast = state.currentIndex === state.questions.length - 1;
+  document.getElementById('next-btn').textContent = isLast ? 'پایان آزمون' : 'سؤال بعدی';
+}
+
+function selectChoice(idx) {
+  if (state.selectedIndex !== null) return; // فقط یک‌بار قابل انتخاب
+
+  state.selectedIndex = idx;
+  const q = state.questions[state.currentIndex];
+  const buttons = document.querySelectorAll('.choice-btn');
+
+  buttons.forEach((btn, i) => {
+    btn.disabled = true;
+    if (i === q.correct_index) {
+      btn.classList.add('correct');
+    } else if (i === idx) {
+      btn.classList.add('wrong');
+    }
+  });
+
+  const isCorrect = idx === q.correct_index;
+  state.answers.push(isCorrect);
+
+  document.getElementById('next-btn').disabled = false;
+}
+
+document.getElementById('next-btn').addEventListener('click', function () {
+  if (state.currentIndex < state.questions.length - 1) {
+    state.currentIndex++;
+    renderQuestion();
+  } else {
+    finishQuiz();
+  }
+});
+
+/* ═══════════════════════════════════════════════
+   صفحه‌ی ۳ — نتیجه و ارسال به ربات
+═══════════════════════════════════════════════ */
+function finishQuiz() {
+  const score = state.answers.filter(Boolean).length;
+  const total = state.questions.length;
+
+  document.getElementById('result-score').innerHTML =
+    `${toPersianDigits(score)}<span>/${toPersianDigits(total)}</span>`;
+
+  const percent = Math.round((score / total) * 100);
+  let message;
+  if (percent >= 80) message = '🎉 عملکرد عالی! تبریک می‌گوییم.';
+  else if (percent >= 50) message = '👍 عملکرد خوبی داشتید.';
+  else message = '📚 پیشنهاد می‌شود مطالب را دوباره مرور کنید.';
+
+  document.getElementById('result-message').textContent = message;
+
+  showScreen('screen-result');
+}
+
+document.getElementById('finish-btn').addEventListener('click', function () {
+  const score = state.answers.filter(Boolean).length;
+  const total = state.questions.length;
+
+  const payload = {
+    ...state.registration,
+    score,
+    total,
+  };
+
+  const btn = document.getElementById('finish-btn');
+  const label = document.getElementById('finish-label');
+  const spinner = document.getElementById('finish-spinner');
+
+  btn.disabled = true;
+  label.style.display = 'none';
+  spinner.style.display = 'inline-flex';
+
+  if (!tg) {
+    showToast('⚠️ این صفحه باید از داخل ربات تلگرام باز شود.');
+    btn.disabled = false;
+    label.style.display = 'inline';
+    spinner.style.display = 'none';
+    return;
+  }
+
+  /*
+   * tg.sendData() نتیجه را مستقیم به quiz_bot.py می‌فرستد
+   * (به هندلر handle_webapp_data). ربات خودش پیام خلاصه را
+   * برای ادمین می‌فرستد. توجه: فراخوانی sendData به‌صورت
+   * خودکار Mini App را می‌بندد — این رفتار استاندارد تلگرام است.
+   */
+  tg.sendData(JSON.stringify(payload));
+});
+
+/* ═══════════════════════════════════════════════
+   ابزارهای کمکی نمایش
+═══════════════════════════════════════════════ */
+function toPersianDigits(num) {
+  const persian = ['۰','۱','۲','۳','۴','۵','۶','۷','۸','۹'];
+  return String(num).replace(/[0-9]/g, (d) => persian[+d]);
+}
+
+function escapeHtml(str) {
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+}
+</script>
+</body>
+</html>
