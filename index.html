@@ -12,9 +12,10 @@
     --surface:   #ffffff;
     --ink:       #1f2430;
     --muted:     #6b7280;
-    --primary:   #2f6f4f;   /* سبز تیره — اعتماد و آرامش */
+    --primary:   #2f6f4f;
     --primary-d: #244f3a;
-    --accent:    #c9622a;   /* نارنجی سوخته — برای تمرکز روی CTA */
+    --primary-l: rgba(47,111,79,0.10);
+    --accent:    #c9622a;
     --danger:    #b3432f;
     --success:   #2f6f4f;
     --border:    #e5e1da;
@@ -29,6 +30,7 @@
     color: var(--ink);
     min-height: 100vh;
     -webkit-tap-highlight-color: transparent;
+    overflow-x: hidden;
   }
 
   #app {
@@ -37,6 +39,7 @@
     min-height: 100vh;
     display: flex;
     flex-direction: column;
+    position: relative;
   }
 
   .screen {
@@ -44,20 +47,24 @@
     flex: 1;
     flex-direction: column;
     padding: 1.5rem 1.25rem 2rem;
-    animation: fadeIn .35s ease;
   }
-  .screen.active { display: flex; }
+  .screen.active {
+    display: flex;
+    animation: screenIn .32s cubic-bezier(.2,.8,.2,1);
+  }
+  .screen.active.back {
+    animation: screenInBack .32s cubic-bezier(.2,.8,.2,1);
+  }
+  @keyframes screenIn {
+    from { opacity: 0; transform: translateX(18px); }
+    to   { opacity: 1; transform: translateX(0); }
+  }
+  @keyframes screenInBack {
+    from { opacity: 0; transform: translateX(-18px); }
+    to   { opacity: 1; transform: translateX(0); }
+  }
 
-  @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(6px); }
-    to   { opacity: 1; transform: translateY(0); }
-  }
-
-  /* ── Header ── */
-  .app-header {
-    text-align: center;
-    margin-bottom: 1.75rem;
-  }
+  .app-header { text-align: center; margin-bottom: 1.75rem; }
   .app-header .eyebrow {
     font-size: .78rem;
     font-weight: 600;
@@ -66,30 +73,12 @@
     text-transform: uppercase;
     margin-bottom: .35rem;
   }
-  .app-header h1 {
-    font-size: 1.5rem;
-    font-weight: 800;
-    letter-spacing: -0.01em;
-  }
-  .app-header p {
-    color: var(--muted);
-    font-size: .9rem;
-    margin-top: .35rem;
-    line-height: 1.6;
-  }
+  .app-header h1 { font-size: 1.5rem; font-weight: 800; letter-spacing: -0.01em; }
+  .app-header p { color: var(--muted); font-size: .9rem; margin-top: .35rem; line-height: 1.6; }
 
-  /* ── Form ── */
-  .field {
-    margin-bottom: 1.1rem;
-  }
-  .field label {
-    display: block;
-    font-size: .82rem;
-    font-weight: 600;
-    color: var(--ink);
-    margin-bottom: .4rem;
-  }
-  .field input {
+  .field { margin-bottom: 1.1rem; }
+  .field label { display: block; font-size: .82rem; font-weight: 600; color: var(--ink); margin-bottom: .4rem; }
+  .field input, .field textarea {
     width: 100%;
     padding: .85rem 1rem;
     border: 1.5px solid var(--border);
@@ -101,26 +90,17 @@
     outline: none;
     transition: border-color .2s, box-shadow .2s;
   }
-  .field input:focus {
+  .field textarea { resize: vertical; min-height: 110px; line-height: 1.6; }
+  .field input:focus, .field textarea:focus {
     border-color: var(--primary);
-    box-shadow: 0 0 0 3px rgba(47,111,79,0.12);
+    box-shadow: 0 0 0 3px var(--primary-l);
   }
-  .field input::placeholder { color: #b3aea3; }
-  .field .hint {
-    font-size: .76rem;
-    color: var(--muted);
-    margin-top: .35rem;
-  }
-  .field .error-msg {
-    font-size: .78rem;
-    color: var(--danger);
-    margin-top: .35rem;
-    display: none;
-  }
-  .field.has-error input { border-color: var(--danger); }
+  .field input::placeholder, .field textarea::placeholder { color: #b3aea3; }
+  .field .hint { font-size: .76rem; color: var(--muted); margin-top: .35rem; }
+  .field .error-msg { font-size: .78rem; color: var(--danger); margin-top: .35rem; display: none; }
+  .field.has-error input, .field.has-error textarea { border-color: var(--danger); }
   .field.has-error .error-msg { display: block; }
 
-  /* ── Buttons ── */
   .btn {
     display: flex;
     align-items: center;
@@ -134,66 +114,99 @@
     font-size: .98rem;
     font-weight: 700;
     cursor: pointer;
-    transition: transform .15s, opacity .15s;
+    transition: transform .12s ease, opacity .15s, background .15s;
   }
-  .btn:active { transform: scale(0.98); }
-  .btn:disabled { opacity: .5; cursor: not-allowed; }
-  .btn-primary {
-    background: var(--primary);
-    color: #fff;
-  }
+  .btn:active:not(:disabled) { transform: scale(0.97); }
+  .btn:disabled { opacity: .45; cursor: not-allowed; }
+  .btn-primary { background: var(--primary); color: #fff; }
   .btn-primary:active:not(:disabled) { background: var(--primary-d); }
-  .btn-outline {
-    background: transparent;
-    border: 1.5px solid var(--border);
-    color: var(--ink);
-  }
+  .btn-outline { background: transparent; border: 1.5px solid var(--border); color: var(--ink); }
+  .btn-outline:active:not(:disabled) { background: rgba(0,0,0,0.03); }
 
   .form-footer { margin-top: auto; padding-top: 1.5rem; }
 
-  /* ── Quiz Progress ── */
-  .quiz-progress {
+  .exam-list { display: flex; flex-direction: column; gap: .75rem; }
+  .exam-card {
     display: flex;
     align-items: center;
-    gap: .75rem;
-    margin-bottom: 1.5rem;
+    gap: .9rem;
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.1rem 1.1rem;
+    cursor: pointer;
+    text-align: right;
+    transition: border-color .15s, transform .12s, box-shadow .15s;
+    animation: cardPop .35s cubic-bezier(.2,.9,.25,1.2) backwards;
   }
-  .progress-track {
-    flex: 1;
-    height: 6px;
-    background: var(--border);
-    border-radius: 999px;
-    overflow: hidden;
+  .exam-card:active { transform: scale(0.98); }
+  @keyframes cardPop {
+    from { opacity: 0; transform: translateY(10px) scale(.98); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
   }
-  .progress-fill {
-    height: 100%;
-    background: var(--primary);
-    border-radius: 999px;
-    transition: width .35s ease;
+  .exam-icon {
+    flex-shrink: 0;
+    width: 46px; height: 46px;
+    border-radius: 12px;
+    background: var(--primary-l);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.3rem;
   }
-  .progress-label {
-    font-size: .8rem;
-    font-weight: 700;
-    color: var(--muted);
-    white-space: nowrap;
-    font-variant-numeric: tabular-nums;
-  }
+  .exam-info { flex: 1; min-width: 0; }
+  .exam-info h3 { font-size: 1rem; font-weight: 700; margin-bottom: .2rem; }
+  .exam-info p { font-size: .8rem; color: var(--muted); line-height: 1.5; }
+  .exam-meta { font-size: .72rem; color: var(--primary); font-weight: 600; margin-top: .35rem; }
+  .exam-arrow { flex-shrink: 0; color: var(--muted); font-size: 1.1rem; }
 
-  /* ── Question Card ── */
+  .empty-state { text-align: center; padding: 3rem 1rem; color: var(--muted); }
+  .empty-state .icon { font-size: 2.5rem; margin-bottom: .75rem; }
+
+  .quiz-topbar { display: flex; align-items: center; gap: .6rem; margin-bottom: 1.25rem; }
+  .back-btn {
+    flex-shrink: 0;
+    width: 38px; height: 38px;
+    border-radius: 10px;
+    border: 1.5px solid var(--border);
+    background: var(--surface);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1rem;
+    cursor: pointer;
+    color: var(--ink);
+    transition: background .15s, transform .12s;
+  }
+  .back-btn:active { transform: scale(0.93); background: rgba(0,0,0,0.04); }
+
+  .quiz-progress { display: flex; align-items: center; gap: .75rem; flex: 1; }
+  .progress-track { flex: 1; height: 6px; background: var(--border); border-radius: 999px; overflow: hidden; }
+  .progress-fill { height: 100%; background: var(--primary); border-radius: 999px; transition: width .4s cubic-bezier(.2,.8,.2,1); }
+  .progress-label { font-size: .8rem; font-weight: 700; color: var(--muted); white-space: nowrap; font-variant-numeric: tabular-nums; }
+
+  .question-stage { flex: 1; display: flex; flex-direction: column; }
   .question-card {
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: var(--radius);
     padding: 1.5rem 1.25rem;
     margin-bottom: 1.25rem;
+    animation: questionIn .3s cubic-bezier(.2,.85,.25,1);
   }
-  .question-text {
-    font-size: 1.08rem;
+  @keyframes questionIn {
+    from { opacity: 0; transform: translateY(8px) scale(.99); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+  }
+  .question-type-tag {
+    display: inline-block;
+    font-size: .68rem;
     font-weight: 700;
-    line-height: 1.7;
+    color: var(--accent);
+    background: rgba(201,98,42,0.1);
+    padding: .2rem .55rem;
+    border-radius: 999px;
+    margin-bottom: .65rem;
   }
+  .question-text { font-size: 1.08rem; font-weight: 700; line-height: 1.7; }
 
-  .choices { display: flex; flex-direction: column; gap: .65rem; flex: 1; }
+  .choices { display: flex; flex-direction: column; gap: .65rem; }
   .choice-btn {
     display: flex;
     align-items: center;
@@ -209,70 +222,40 @@
     color: var(--ink);
     cursor: pointer;
     transition: border-color .15s, background .15s, transform .1s;
+    animation: choiceIn .3s cubic-bezier(.2,.85,.25,1) backwards;
+  }
+  @keyframes choiceIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to   { opacity: 1; transform: translateY(0); }
   }
   .choice-btn:active { transform: scale(0.99); }
   .choice-marker {
     flex-shrink: 0;
-    width: 26px;
-    height: 26px;
+    width: 26px; height: 26px;
     border-radius: 50%;
     border: 1.5px solid var(--border);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: .78rem;
-    font-weight: 700;
-    color: var(--muted);
+    display: flex; align-items: center; justify-content: center;
+    font-size: .78rem; font-weight: 700; color: var(--muted);
+    transition: background .15s, border-color .15s, transform .2s;
   }
-  .choice-btn.selected {
-    border-color: var(--primary);
-    background: rgba(47,111,79,0.06);
-  }
-  .choice-btn.selected .choice-marker {
-    border-color: var(--primary);
-    background: var(--primary);
-    color: #fff;
-  }
-  .choice-btn.correct {
-    border-color: var(--success);
-    background: rgba(47,111,79,0.08);
-  }
-  .choice-btn.correct .choice-marker {
-    border-color: var(--success);
-    background: var(--success);
-    color: #fff;
-  }
-  .choice-btn.wrong {
-    border-color: var(--danger);
-    background: rgba(179,67,47,0.07);
-  }
-  .choice-btn.wrong .choice-marker {
-    border-color: var(--danger);
-    background: var(--danger);
-    color: #fff;
-  }
-  .choice-btn:disabled { cursor: default; }
+  .choice-btn.selected { border-color: var(--primary); background: var(--primary-l); }
+  .choice-btn.selected .choice-marker { border-color: var(--primary); background: var(--primary); color: #fff; transform: scale(1.08); }
+
+  .essay-box { width: 100%; }
+  .essay-box textarea { width: 100%; min-height: 160px; }
+  .essay-counter { font-size: .74rem; color: var(--muted); margin-top: .4rem; text-align: left; }
 
   .quiz-footer { margin-top: 1.25rem; }
 
-  /* ── Result Screen ── */
-  .result-hero {
-    text-align: center;
-    padding: 2.5rem 1rem 2rem;
+  .result-hero { text-align: center; padding: 2rem 1rem 1.5rem; animation: resultPop .5s cubic-bezier(.2,.9,.2,1.1); }
+  @keyframes resultPop {
+    from { opacity: 0; transform: scale(.85); }
+    to   { opacity: 1; transform: scale(1); }
   }
-  .result-score {
-    font-size: 3.2rem;
-    font-weight: 800;
-    color: var(--primary);
-    line-height: 1;
-    font-variant-numeric: tabular-nums;
-  }
+  .result-icon { font-size: 2.6rem; margin-bottom: .5rem; }
+  .result-score { font-size: 3.2rem; font-weight: 800; color: var(--primary); line-height: 1; font-variant-numeric: tabular-nums; }
   .result-score span { font-size: 1.4rem; color: var(--muted); font-weight: 600; }
-  .result-label {
-    font-size: .95rem;
-    color: var(--muted);
-    margin-top: .5rem;
-  }
+  .result-label { font-size: .95rem; color: var(--muted); margin-top: .5rem; }
   .result-message {
     background: var(--surface);
     border: 1px solid var(--border);
@@ -283,8 +266,20 @@
     line-height: 1.7;
     color: var(--ink);
   }
+  .result-stats { display: flex; gap: .6rem; margin-top: 1rem; }
+  .stat-pill {
+    flex: 1;
+    text-align: center;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: .7rem .4rem;
+  }
+  .stat-pill .num { font-size: 1.15rem; font-weight: 800; font-variant-numeric: tabular-nums; }
+  .stat-pill .lbl { font-size: .68rem; color: var(--muted); margin-top: .15rem; }
+  .stat-pill.correct .num { color: var(--success); }
+  .stat-pill.wrong .num { color: var(--danger); }
 
-  /* ── Loading ── */
   .spinner {
     width: 22px; height: 22px;
     border: 2.5px solid rgba(255,255,255,.35);
@@ -294,7 +289,15 @@
   }
   @keyframes spin { to { transform: rotate(360deg); } }
 
-  /* ── Toast ── */
+  .page-spinner {
+    width: 30px; height: 30px;
+    border: 3px solid var(--border);
+    border-top-color: var(--primary);
+    border-radius: 50%;
+    animation: spin .7s linear infinite;
+    margin: 3rem auto;
+  }
+
   #toast {
     position: fixed;
     bottom: 1.5rem;
@@ -317,17 +320,27 @@
 
 <div id="app">
 
-  <!-- ════════════════════════════════════════
-       صفحه‌ی ۱ — فرم ثبت‌نام
-  ════════════════════════════════════════ -->
-  <div class="screen active" id="screen-register">
+  <div class="screen active" id="screen-exam-list">
     <div class="app-header">
-      <div class="eyebrow">مرحله ۱ از ۲</div>
-      <h1>ثبت‌نام در آزمون</h1>
-      <p>برای شروع آزمون، لطفاً اطلاعات زیر را تکمیل کنید.</p>
+      <div class="eyebrow">آزمون‌های موجود</div>
+      <h1>یک آزمون انتخاب کنید</h1>
+      <p>برای شروع، روی یکی از آزمون‌های زیر بزنید.</p>
+    </div>
+    <div class="exam-list" id="exam-list-container">
+      <div class="page-spinner"></div>
+    </div>
+  </div>
+
+  <div class="screen" id="screen-register">
+    <div class="quiz-topbar">
+      <button class="back-btn" id="back-to-list-1">&#8594;</button>
+      <div class="app-header" style="margin-bottom:0; flex:1;">
+        <div class="eyebrow">مرحله ۱ از ۲</div>
+        <h1 style="font-size:1.2rem;" id="register-exam-title">ثبت‌نام در آزمون</h1>
+      </div>
     </div>
 
-    <form id="register-form" novalidate>
+    <form id="register-form" novalidate style="flex:1; display:flex; flex-direction:column;">
       <div class="field" id="field-first-name">
         <label for="first-name">نام</label>
         <input type="text" id="first-name" placeholder="مثلاً: علی" autocomplete="off" />
@@ -355,23 +368,29 @@
     </form>
   </div>
 
-  <!-- ════════════════════════════════════════
-       صفحه‌ی ۲ — آزمون
-  ════════════════════════════════════════ -->
   <div class="screen" id="screen-quiz">
-    <div class="quiz-progress">
-      <span class="progress-label" id="progress-label">۱ / ۵</span>
-      <div class="progress-track">
-        <div class="progress-fill" id="progress-fill" style="width:0%"></div>
+    <div class="quiz-topbar">
+      <button class="back-btn" id="prev-btn" title="سؤال قبلی">&#8594;</button>
+      <div class="quiz-progress">
+        <span class="progress-label" id="progress-label">۱ / ۵</span>
+        <div class="progress-track">
+          <div class="progress-fill" id="progress-fill" style="width:0%"></div>
+        </div>
       </div>
     </div>
 
-    <div class="question-card">
-      <div class="question-text" id="question-text">در حال بارگذاری سؤال...</div>
-    </div>
+    <div class="question-stage" id="question-stage">
+      <div class="question-card" id="question-card">
+        <span class="question-type-tag" id="question-type-tag" style="display:none;">پاسخ تشریحی</span>
+        <div class="question-text" id="question-text">در حال بارگذاری سؤال...</div>
+      </div>
 
-    <div class="choices" id="choices-container">
-      <!-- گزینه‌ها داینامیک با JS ساخته می‌شوند -->
+      <div class="choices" id="choices-container"></div>
+
+      <div class="essay-box" id="essay-container" style="display:none;">
+        <textarea id="essay-textarea" placeholder="پاسخ خود را اینجا بنویسید..." maxlength="2000"></textarea>
+        <div class="essay-counter"><span id="essay-char-count">۰</span> / ۲۰۰۰ کاراکتر</div>
+      </div>
     </div>
 
     <div class="quiz-footer">
@@ -381,14 +400,14 @@
     </div>
   </div>
 
-  <!-- ════════════════════════════════════════
-       صفحه‌ی ۳ — نتیجه
-  ════════════════════════════════════════ -->
   <div class="screen" id="screen-result">
     <div class="result-hero">
+      <div class="result-icon" id="result-icon">🎯</div>
       <div class="result-score" id="result-score">۰<span>/۰</span></div>
-      <div class="result-label">پاسخ صحیح از کل سؤالات</div>
+      <div class="result-label">نمره‌ی کسب‌شده</div>
     </div>
+
+    <div class="result-stats" id="result-stats"></div>
 
     <div class="result-message" id="result-message">
       در حال ارسال نتیجه...
@@ -407,16 +426,12 @@
 <div id="toast"></div>
 
 <script>
-/* ═══════════════════════════════════════════════
-   راه‌اندازی Telegram WebApp SDK
-═══════════════════════════════════════════════ */
 const tg = window.Telegram?.WebApp;
 if (tg) {
   tg.ready();
   tg.expand();
 }
 
-/* اطلاعات تلگرام کاربر — مستقیم از initDataUnsafe خوانده می‌شود */
 function getTelegramUser() {
   const unsafe = tg?.initDataUnsafe;
   const user = unsafe?.user;
@@ -427,46 +442,113 @@ function getTelegramUser() {
   };
 }
 
-/* ═══════════════════════════════════════════════
-   وضعیت کلی برنامه
-═══════════════════════════════════════════════ */
 const state = {
-  registration: null,   // { first_name, last_name, national_id, telegram_id, username }
-  questions:    [],
+  exams:        [],
+  currentExam:  null,
+  registration: null,
   currentIndex: 0,
-  selectedIndex: null,
-  answers:      [],      // آرایه‌ای از true/false برای هر سؤال
+  answers:      {},
 };
 
-/* ═══════════════════════════════════════════════
-   ابزارهای کمکی UI
-═══════════════════════════════════════════════ */
-function showScreen(id) {
-  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
+function showScreen(id, opts) {
+  opts = opts || {};
+  document.querySelectorAll('.screen').forEach(function (s) {
+    s.classList.remove('active', 'back');
+  });
+  const el = document.getElementById(id);
+  if (opts.back) el.classList.add('back');
+  el.classList.add('active');
 }
 
 function showToast(msg) {
   const t = document.getElementById('toast');
   t.textContent = msg;
   t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 3000);
+  setTimeout(function () { t.classList.remove('show'); }, 3000);
 }
 
-/* تبدیل ارقام فارسی/عربی به انگلیسی برای اعتبارسنجی کد ملی */
 function toEnglishDigits(str) {
   const persian = '۰۱۲۳۴۵۶۷۸۹';
   const arabic  = '٠١٢٣٤٥٦٧٨٩';
-  return str.replace(/[۰-۹٠-٩]/g, (d) => {
+  return str.replace(/[۰-۹٠-٩]/g, function (d) {
     let idx = persian.indexOf(d);
     if (idx === -1) idx = arabic.indexOf(d);
     return idx !== -1 ? idx : d;
   });
 }
 
-/* ═══════════════════════════════════════════════
-   صفحه‌ی ۱ — اعتبارسنجی و ثبت‌نام
-═══════════════════════════════════════════════ */
+function toPersianDigits(num) {
+  const persian = ['۰','۱','۲','۳','۴','۵','۶','۷','۸','۹'];
+  return String(num).replace(/[0-9]/g, function (d) { return persian[+d]; });
+}
+
+function escapeHtml(str) {
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+}
+
+const EXAM_ICONS = ['📘', '🧠', '🧪', '📐', '🌍', '⚙️', '📊', '🗒️'];
+
+function loadExamList() {
+  fetch('exams.json', { cache: 'no-store' })
+    .then(function (res) {
+      if (!res.ok) throw new Error('load failed');
+      return res.json();
+    })
+    .then(function (data) {
+      state.exams = data;
+      renderExamList();
+    })
+    .catch(function (err) {
+      console.error(err);
+      document.getElementById('exam-list-container').innerHTML =
+        '<div class="empty-state"><div class="icon">⚠️</div><p>خطا در بارگذاری آزمون‌ها. لطفاً دوباره تلاش کنید.</p></div>';
+    });
+}
+
+function renderExamList() {
+  const container = document.getElementById('exam-list-container');
+  container.innerHTML = '';
+
+  if (!state.exams.length) {
+    container.innerHTML = '<div class="empty-state"><div class="icon">📭</div><p>در حال حاضر هیچ آزمونی برای شرکت وجود ندارد.</p></div>';
+    return;
+  }
+
+  state.exams.forEach(function (exam, i) {
+    const card = document.createElement('div');
+    card.className = 'exam-card';
+    card.style.animationDelay = (i * 60) + 'ms';
+
+    const qCount = (exam.questions && exam.questions.length) || 0;
+    const icon = EXAM_ICONS[i % EXAM_ICONS.length];
+
+    card.innerHTML =
+      '<div class="exam-icon">' + icon + '</div>' +
+      '<div class="exam-info">' +
+        '<h3>' + escapeHtml(exam.title || exam.id) + '</h3>' +
+        '<p>' + escapeHtml(exam.description || '') + '</p>' +
+        '<div class="exam-meta">' + toPersianDigits(qCount) + ' سؤال</div>' +
+      '</div>' +
+      '<div class="exam-arrow">‹</div>';
+
+    card.addEventListener('click', function () { selectExam(exam); });
+    container.appendChild(card);
+  });
+}
+
+function selectExam(exam) {
+  state.currentExam = exam;
+  document.getElementById('register-exam-title').textContent = exam.title || 'ثبت‌نام در آزمون';
+  showScreen('screen-register');
+}
+
+document.getElementById('back-to-list-1').addEventListener('click', function () {
+  showScreen('screen-exam-list', { back: true });
+});
+
 function setFieldError(fieldId, hasError) {
   document.getElementById(fieldId).classList.toggle('has-error', hasError);
 }
@@ -506,122 +588,209 @@ document.getElementById('register-form').addEventListener('submit', function (e)
   startQuiz();
 });
 
-/* ═══════════════════════════════════════════════
-   صفحه‌ی ۲ — منطق آزمون
-═══════════════════════════════════════════════ */
-async function startQuiz() {
-  try {
-    const res = await fetch('questions.json', { cache: 'no-store' });
-    if (!res.ok) throw new Error('خطا در دریافت سؤالات');
-    state.questions = await res.json();
-  } catch (err) {
-    console.error(err);
-    showToast('❌ خطا در بارگذاری سؤالات. لطفاً دوباره تلاش کنید.');
-    return;
-  }
-
-  if (!state.questions.length) {
-    showToast('⚠️ هیچ سؤالی برای نمایش وجود ندارد.');
+function startQuiz() {
+  if (!state.currentExam.questions || !state.currentExam.questions.length) {
+    showToast('⚠️ این آزمون هیچ سؤالی ندارد.');
     return;
   }
 
   state.currentIndex = 0;
-  state.answers = [];
+  state.answers = {};
   showScreen('screen-quiz');
   renderQuestion();
 }
 
 function renderQuestion() {
-  const q = state.questions[state.currentIndex];
-  state.selectedIndex = null;
+  const q = state.currentExam.questions[state.currentIndex];
+  const total = state.currentExam.questions.length;
+  const current = state.currentIndex + 1;
+
+  document.getElementById('progress-label').textContent = toPersianDigits(current) + ' / ' + toPersianDigits(total);
+  document.getElementById('progress-fill').style.width = ((current / total) * 100) + '%';
+
+  const card = document.getElementById('question-card');
+  card.style.animation = 'none';
+  requestAnimationFrame(function () { card.style.animation = ''; });
 
   document.getElementById('question-text').textContent = q.question;
 
-  const total = state.questions.length;
-  const current = state.currentIndex + 1;
-  document.getElementById('progress-label').textContent = `${toPersianDigits(current)} / ${toPersianDigits(total)}`;
-  document.getElementById('progress-fill').style.width = `${(current / total) * 100}%`;
+  const typeTag = document.getElementById('question-type-tag');
+  const choicesContainer = document.getElementById('choices-container');
+  const essayContainer = document.getElementById('essay-container');
+  const textarea = document.getElementById('essay-textarea');
 
-  const container = document.getElementById('choices-container');
-  container.innerHTML = '';
+  const qid = String(q.id);
+  const savedAnswer = state.answers[qid];
 
-  const letters = ['الف', 'ب', 'پ', 'ت'];
+  if (q.type === 'essay') {
+    typeTag.style.display = 'inline-block';
+    choicesContainer.style.display = 'none';
+    choicesContainer.innerHTML = '';
+    essayContainer.style.display = 'block';
+    textarea.value = (typeof savedAnswer === 'string') ? savedAnswer : '';
+    updateEssayCounter();
+    document.getElementById('next-btn').disabled = textarea.value.trim().length === 0;
+  } else {
+    typeTag.style.display = 'none';
+    essayContainer.style.display = 'none';
+    choicesContainer.style.display = 'flex';
+    choicesContainer.innerHTML = '';
 
-  q.choices.forEach((choiceText, idx) => {
-    const btn = document.createElement('button');
-    btn.className = 'choice-btn';
-    btn.type = 'button';
-    btn.innerHTML = `<span class="choice-marker">${letters[idx]}</span><span>${escapeHtml(choiceText)}</span>`;
-    btn.addEventListener('click', () => selectChoice(idx));
-    container.appendChild(btn);
-  });
+    const letters = ['الف', 'ب', 'پ', 'ت'];
+    q.choices.forEach(function (choiceText, idx) {
+      const btn = document.createElement('button');
+      btn.className = 'choice-btn';
+      btn.type = 'button';
+      btn.style.animationDelay = (idx * 40) + 'ms';
+      if (savedAnswer === idx) btn.classList.add('selected');
+      btn.innerHTML = '<span class="choice-marker">' + letters[idx] + '</span><span>' + escapeHtml(choiceText) + '</span>';
+      btn.addEventListener('click', function () { selectChoice(idx); });
+      choicesContainer.appendChild(btn);
+    });
 
-  document.getElementById('next-btn').disabled = true;
-  const isLast = state.currentIndex === state.questions.length - 1;
+    document.getElementById('next-btn').disabled = (savedAnswer === undefined);
+  }
+
+  const isLast = state.currentIndex === total - 1;
   document.getElementById('next-btn').textContent = isLast ? 'پایان آزمون' : 'سؤال بعدی';
+
+  const prevBtn = document.getElementById('prev-btn');
+  prevBtn.style.visibility = (state.currentIndex === 0) ? 'hidden' : 'visible';
 }
 
 function selectChoice(idx) {
-  if (state.selectedIndex !== null) return; // فقط یک‌بار قابل انتخاب
+  const q = state.currentExam.questions[state.currentIndex];
+  const qid = String(q.id);
+  state.answers[qid] = idx;
 
-  state.selectedIndex = idx;
-  const q = state.questions[state.currentIndex];
-  const buttons = document.querySelectorAll('.choice-btn');
-
-  buttons.forEach((btn, i) => {
-    btn.disabled = true;
-    if (i === q.correct_index) {
-      btn.classList.add('correct');
-    } else if (i === idx) {
-      btn.classList.add('wrong');
-    }
+  document.querySelectorAll('.choice-btn').forEach(function (btn, i) {
+    btn.classList.toggle('selected', i === idx);
   });
-
-  const isCorrect = idx === q.correct_index;
-  state.answers.push(isCorrect);
 
   document.getElementById('next-btn').disabled = false;
 }
 
+document.getElementById('essay-textarea').addEventListener('input', function () {
+  updateEssayCounter();
+  const q = state.currentExam.questions[state.currentIndex];
+  const qid = String(q.id);
+  state.answers[qid] = this.value;
+  document.getElementById('next-btn').disabled = this.value.trim().length === 0;
+});
+
+function updateEssayCounter() {
+  const len = document.getElementById('essay-textarea').value.length;
+  document.getElementById('essay-char-count').textContent = toPersianDigits(len);
+}
+
+document.getElementById('prev-btn').addEventListener('click', function () {
+  if (state.currentIndex > 0) {
+    state.currentIndex--;
+    renderQuestion();
+  }
+});
+
 document.getElementById('next-btn').addEventListener('click', function () {
-  if (state.currentIndex < state.questions.length - 1) {
+  const settings = state.currentExam.settings || {};
+  const q = state.currentExam.questions[state.currentIndex];
+  const qid = String(q.id);
+  const currentVal = state.answers[qid];
+  const answered = (currentVal !== undefined) && !(typeof currentVal === 'string' && currentVal.trim() === '');
+
+  if (settings.require_all_answers && !answered) {
+    showToast('⚠️ پاسخ به این سؤال الزامی است.');
+    return;
+  }
+
+  if (state.currentIndex < state.currentExam.questions.length - 1) {
     state.currentIndex++;
     renderQuestion();
   } else {
+    if (settings.require_all_answers) {
+      const missingIdx = state.currentExam.questions.findIndex(function (qq) {
+        const a = state.answers[String(qq.id)];
+        return (a === undefined) || (typeof a === 'string' && a.trim() === '');
+      });
+      if (missingIdx !== -1) {
+        showToast('⚠️ پاسخ به همه‌ی سؤالات این آزمون الزامی است.');
+        state.currentIndex = missingIdx;
+        renderQuestion();
+        return;
+      }
+    }
     finishQuiz();
   }
 });
 
-/* ═══════════════════════════════════════════════
-   صفحه‌ی ۳ — نتیجه و ارسال به ربات
-═══════════════════════════════════════════════ */
+function computeLocalScore() {
+  const settings = state.currentExam.settings || {};
+  const penalty = settings.wrong_answer_penalty || 0;
+
+  let score = 0, maxScore = 0, correct = 0, wrong = 0, unanswered = 0;
+  let hasEssay = false;
+
+  state.currentExam.questions.forEach(function (q) {
+    const qid = String(q.id);
+    const given = state.answers[qid];
+
+    if (q.type === 'essay') {
+      hasEssay = true;
+      maxScore += (q.max_score || 5);
+      if (given === undefined || String(given).trim() === '') unanswered++;
+      return;
+    }
+
+    maxScore += 1;
+    if (given === undefined) { unanswered++; return; }
+    if (given === q.correct_index) { score += 1; correct++; }
+    else { wrong++; score -= penalty; }
+  });
+
+  return { score: Math.round(score * 100) / 100, maxScore: maxScore, correct: correct, wrong: wrong, unanswered: unanswered, hasEssay: hasEssay };
+}
+
 function finishQuiz() {
-  const score = state.answers.filter(Boolean).length;
-  const total = state.questions.length;
+  const result = computeLocalScore();
 
   document.getElementById('result-score').innerHTML =
-    `${toPersianDigits(score)}<span>/${toPersianDigits(total)}</span>`;
+    toPersianDigits(result.score) + '<span>/' + toPersianDigits(result.maxScore) + '</span>';
 
-  const percent = Math.round((score / total) * 100);
-  let message;
-  if (percent >= 80) message = '🎉 عملکرد عالی! تبریک می‌گوییم.';
-  else if (percent >= 50) message = '👍 عملکرد خوبی داشتید.';
-  else message = '📚 پیشنهاد می‌شود مطالب را دوباره مرور کنید.';
+  const statsContainer = document.getElementById('result-stats');
+  statsContainer.innerHTML =
+    '<div class="stat-pill correct"><div class="num">' + toPersianDigits(result.correct) + '</div><div class="lbl">صحیح</div></div>' +
+    '<div class="stat-pill wrong"><div class="num">' + toPersianDigits(result.wrong) + '</div><div class="lbl">غلط</div></div>' +
+    '<div class="stat-pill"><div class="num">' + toPersianDigits(result.unanswered) + '</div><div class="lbl">بی‌پاسخ</div></div>';
 
+  const ratio = result.maxScore > 0 ? result.score / result.maxScore : 0;
+  let message, icon;
+  if (result.hasEssay) {
+    icon = '📝';
+    message = 'این نمره بدون درنظرگرفتن پاسخ(های) تشریحی است. نمره‌ی نهایی پس از بررسی توسط مدیر، در همین چت ربات به شما اعلام خواهد شد.';
+  } else if (ratio >= 0.8) {
+    icon = '🎉';
+    message = 'عملکرد عالی! تبریک می‌گوییم.';
+  } else if (ratio >= 0.5) {
+    icon = '👍';
+    message = 'عملکرد خوبی داشتید.';
+  } else {
+    icon = '📚';
+    message = 'پیشنهاد می‌شود مطالب را دوباره مرور کنید.';
+  }
+
+  document.getElementById('result-icon').textContent = icon;
   document.getElementById('result-message').textContent = message;
 
   showScreen('screen-result');
 }
 
 document.getElementById('finish-btn').addEventListener('click', function () {
-  const score = state.answers.filter(Boolean).length;
-  const total = state.questions.length;
+  const answersPayload = {};
+  Object.keys(state.answers).forEach(function (qid) { answersPayload[qid] = state.answers[qid]; });
 
-  const payload = {
-    ...state.registration,
-    score,
-    total,
-  };
+  const payload = Object.assign({}, state.registration, {
+    exam_id: state.currentExam.id,
+    answers: answersPayload,
+  });
 
   const btn = document.getElementById('finish-btn');
   const label = document.getElementById('finish-label');
@@ -639,29 +808,11 @@ document.getElementById('finish-btn').addEventListener('click', function () {
     return;
   }
 
-  /*
-   * tg.sendData() نتیجه را مستقیم به quiz_bot.py می‌فرستد
-   * (به هندلر handle_webapp_data). ربات خودش پیام خلاصه را
-   * برای ادمین می‌فرستد. توجه: فراخوانی sendData به‌صورت
-   * خودکار Mini App را می‌بندد — این رفتار استاندارد تلگرام است.
-   */
   tg.sendData(JSON.stringify(payload));
 });
 
-/* ═══════════════════════════════════════════════
-   ابزارهای کمکی نمایش
-═══════════════════════════════════════════════ */
-function toPersianDigits(num) {
-  const persian = ['۰','۱','۲','۳','۴','۵','۶','۷','۸','۹'];
-  return String(num).replace(/[0-9]/g, (d) => persian[+d]);
-}
-
-function escapeHtml(str) {
-  return String(str)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;');
-}
+loadExamList();
 </script>
+
 </body>
 </html>

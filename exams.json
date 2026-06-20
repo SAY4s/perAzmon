@@ -1,0 +1,47 @@
+[
+  {
+    "id": "general-knowledge",
+    "title": "آزمون عمومی",
+    "description": "یک آزمون نمونه برای آشنایی با محیط آزمون.",
+    "settings": {
+      "wrong_answer_penalty": 0,
+      "require_all_answers": false
+    },
+    "questions": [
+      {
+        "id": 1,
+        "type": "multiple_choice",
+        "question": "پایتخت ایران کدام شهر است؟",
+        "choices": ["اصفهان", "تهران", "شیراز", "مشهد"],
+        "correct_index": 1
+      },
+      {
+        "id": 2,
+        "type": "multiple_choice",
+        "question": "کدام سیاره به «سیاره سرخ» معروف است؟",
+        "choices": ["زهره", "زمین", "مریخ", "مشتری"],
+        "correct_index": 2
+      },
+      {
+        "id": 3,
+        "type": "multiple_choice",
+        "question": "نتیجه‌ی عبارت ۲ + ۲ × ۳ چند است؟",
+        "choices": ["۸", "۱۲", "۶", "۵"],
+        "correct_index": 0
+      },
+      {
+        "id": 4,
+        "type": "multiple_choice",
+        "question": "بزرگ‌ترین اقیانوس جهان کدام است؟",
+        "choices": ["اقیانوس اطلس", "اقیانوس آرام", "اقیانوس هند", "اقیانوس منجمد شمالی"],
+        "correct_index": 1
+      },
+      {
+        "id": 5,
+        "type": "essay",
+        "question": "به نظر شما مهم‌ترین مهارتی که در سال‌های آینده باید یاد بگیریم چیست و چرا؟",
+        "max_score": 5
+      }
+    ]
+  }
+]
