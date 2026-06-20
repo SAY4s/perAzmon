@@ -5,32 +5,56 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
 <title>آزمون آنلاین</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
-<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
 <style>
   :root {
-    --bg:        #f7f5f2;
-    --surface:   #ffffff;
-    --ink:       #1f2430;
-    --muted:     #6b7280;
-    --primary:   #2f6f4f;
-    --primary-d: #244f3a;
-    --primary-l: rgba(47,111,79,0.10);
-    --accent:    #c9622a;
-    --danger:    #b3432f;
-    --success:   #2f6f4f;
-    --border:    #e5e1da;
-    --radius:    14px;
+    /* کاغذ آزمون قدیمی، زیر نور رومیزی */
+    --paper:       #f1ecdf;
+    --paper-deep:  #e9e2cf;
+    --card:        #faf7ee;
+    --line:        #d8cdac;
+    --line-soft:   #e3d9bf;
+    --ink:         #2a2418;
+    --ink-soft:    #6e6452;
+    --ink-faint:   #9c9277;
+    --stamp:       #9c3a26;
+    --stamp-deep:  #7a2c1c;
+    --stamp-tint:  rgba(156,58,38,0.08);
+    --graphite:    #35312a;
+    --pass:        #3f6b48;
+    --pass-tint:   rgba(63,107,72,0.1);
+    --fail:        #9c3a26;
+    --fail-tint:   rgba(156,58,38,0.08);
+    --radius-card: 4px;
+    --radius-pill: 999px;
+    --serial-font: 'Space Mono', ui-monospace, 'SF Mono', Menlo, monospace;
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
 
   body {
     font-family: 'Vazirmatn', Tahoma, sans-serif;
-    background: var(--bg);
+    background: var(--paper);
     color: var(--ink);
     min-height: 100vh;
     -webkit-tap-highlight-color: transparent;
     overflow-x: hidden;
+  }
+
+  /* بافت کاغذ ساده: خطوط ریز افقی، مثل دفترچه‌ی پاسخ */
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    background-image: repeating-linear-gradient(
+      to bottom,
+      transparent 0,
+      transparent 27px,
+      rgba(42,36,24,0.035) 27px,
+      rgba(42,36,24,0.035) 28px
+    );
+    z-index: 0;
   }
 
   #app {
@@ -40,278 +64,429 @@
     display: flex;
     flex-direction: column;
     position: relative;
+    z-index: 1;
   }
 
   .screen {
     display: none;
     flex: 1;
     flex-direction: column;
-    padding: 1.5rem 1.25rem 2rem;
+    padding: 1.4rem 1.15rem 2rem;
   }
   .screen.active {
     display: flex;
-    animation: screenIn .32s cubic-bezier(.2,.8,.2,1);
+    animation: pageTurnIn .36s cubic-bezier(.22,.9,.27,1);
   }
   .screen.active.back {
-    animation: screenInBack .32s cubic-bezier(.2,.8,.2,1);
+    animation: pageTurnInBack .36s cubic-bezier(.22,.9,.27,1);
   }
-  @keyframes screenIn {
-    from { opacity: 0; transform: translateX(18px); }
-    to   { opacity: 1; transform: translateX(0); }
+  @keyframes pageTurnIn {
+    from { opacity: 0; transform: translateX(14px) rotate(.4deg); }
+    to   { opacity: 1; transform: translateX(0) rotate(0); }
   }
-  @keyframes screenInBack {
-    from { opacity: 0; transform: translateX(-18px); }
-    to   { opacity: 1; transform: translateX(0); }
+  @keyframes pageTurnInBack {
+    from { opacity: 0; transform: translateX(-14px) rotate(-.4deg); }
+    to   { opacity: 1; transform: translateX(0) rotate(0); }
   }
 
-  .app-header { text-align: center; margin-bottom: 1.75rem; }
-  .app-header .eyebrow {
-    font-size: .78rem;
-    font-weight: 600;
-    letter-spacing: .04em;
-    color: var(--primary);
+  /* ── سربرگ مثل برگه‌ی رسمی آزمون ── */
+  .letterhead {
+    border: 1.5px solid var(--ink);
+    border-radius: var(--radius-card);
+    padding: 1rem 1.1rem;
+    margin-bottom: 1.5rem;
+    background: var(--card);
+    position: relative;
+  }
+  .letterhead::before {
+    content: "";
+    position: absolute;
+    top: 6px; right: 6px; bottom: 6px; left: 6px;
+    border: 1px solid var(--line);
+    border-radius: 2px;
+    pointer-events: none;
+  }
+  .letterhead-row {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: .75rem;
+  }
+  .letterhead-eyebrow {
+    font-family: var(--serial-font);
+    font-size: .66rem;
+    letter-spacing: .08em;
+    color: var(--ink-soft);
     text-transform: uppercase;
-    margin-bottom: .35rem;
+    margin-bottom: .3rem;
   }
-  .app-header h1 { font-size: 1.5rem; font-weight: 800; letter-spacing: -0.01em; }
-  .app-header p { color: var(--muted); font-size: .9rem; margin-top: .35rem; line-height: 1.6; }
+  .letterhead-title { font-size: 1.32rem; font-weight: 800; letter-spacing: -0.01em; line-height: 1.3; }
+  .letterhead-sub { color: var(--ink-soft); font-size: .85rem; margin-top: .4rem; line-height: 1.65; }
+  .serial-box {
+    flex-shrink: 0;
+    border: 1.5px solid var(--ink);
+    border-radius: 3px;
+    padding: .3rem .55rem;
+    font-family: var(--serial-font);
+    font-size: .72rem;
+    font-weight: 700;
+    color: var(--ink);
+    background: var(--paper);
+    white-space: nowrap;
+    transform: rotate(-2deg);
+  }
 
-  .field { margin-bottom: 1.1rem; }
-  .field label { display: block; font-size: .82rem; font-weight: 600; color: var(--ink); margin-bottom: .4rem; }
+  /* ── فرم ── */
+  .field { margin-bottom: 1.05rem; }
+  .field label {
+    display: block;
+    font-size: .78rem;
+    font-weight: 700;
+    color: var(--ink-soft);
+    margin-bottom: .4rem;
+    font-family: var(--serial-font);
+    letter-spacing: .02em;
+  }
   .field input, .field textarea {
     width: 100%;
-    padding: .85rem 1rem;
-    border: 1.5px solid var(--border);
-    border-radius: var(--radius);
-    background: var(--surface);
-    font-family: inherit;
-    font-size: .95rem;
+    padding: .8rem .9rem;
+    border: none;
+    border-bottom: 1.5px solid var(--line);
+    border-radius: 0;
+    background: transparent;
+    font-family: 'Vazirmatn', inherit;
+    font-size: .98rem;
     color: var(--ink);
     outline: none;
-    transition: border-color .2s, box-shadow .2s;
+    transition: border-color .2s;
   }
-  .field textarea { resize: vertical; min-height: 110px; line-height: 1.6; }
-  .field input:focus, .field textarea:focus {
-    border-color: var(--primary);
-    box-shadow: 0 0 0 3px var(--primary-l);
+  .field textarea {
+    resize: vertical;
+    min-height: 110px;
+    line-height: 1.7;
+    border: 1.5px solid var(--line);
+    border-radius: var(--radius-card);
+    padding: .85rem 1rem;
   }
-  .field input::placeholder, .field textarea::placeholder { color: #b3aea3; }
-  .field .hint { font-size: .76rem; color: var(--muted); margin-top: .35rem; }
-  .field .error-msg { font-size: .78rem; color: var(--danger); margin-top: .35rem; display: none; }
-  .field.has-error input, .field.has-error textarea { border-color: var(--danger); }
+  .field input:focus, .field textarea:focus { border-color: var(--stamp); }
+  .field input::placeholder, .field textarea::placeholder { color: var(--ink-faint); }
+  .field .hint { font-size: .74rem; color: var(--ink-faint); margin-top: .35rem; }
+  .field .error-msg { font-size: .76rem; color: var(--stamp); margin-top: .35rem; display: none; font-weight: 600; }
+  .field.has-error input, .field.has-error textarea { border-color: var(--stamp); }
   .field.has-error .error-msg { display: block; }
 
+  /* ── دکمه‌ها ── */
   .btn {
     display: flex;
     align-items: center;
     justify-content: center;
     gap: .5rem;
     width: 100%;
-    padding: .95rem 1.25rem;
-    border: none;
-    border-radius: var(--radius);
-    font-family: inherit;
-    font-size: .98rem;
+    padding: .92rem 1.25rem;
+    border: 1.5px solid var(--ink);
+    border-radius: var(--radius-card);
+    font-family: 'Vazirmatn', inherit;
+    font-size: .97rem;
     font-weight: 700;
     cursor: pointer;
-    transition: transform .12s ease, opacity .15s, background .15s;
+    transition: transform .1s ease, background .15s, color .15s;
+    background: var(--ink);
+    color: var(--paper);
   }
   .btn:active:not(:disabled) { transform: scale(0.97); }
-  .btn:disabled { opacity: .45; cursor: not-allowed; }
-  .btn-primary { background: var(--primary); color: #fff; }
-  .btn-primary:active:not(:disabled) { background: var(--primary-d); }
-  .btn-outline { background: transparent; border: 1.5px solid var(--border); color: var(--ink); }
-  .btn-outline:active:not(:disabled) { background: rgba(0,0,0,0.03); }
+  .btn:disabled { opacity: .35; cursor: not-allowed; }
+  .btn-primary { background: var(--stamp); border-color: var(--stamp); color: #fdf8ee; }
+  .btn-primary:active:not(:disabled) { background: var(--stamp-deep); }
+  .btn-outline { background: transparent; color: var(--ink); }
+  .btn-outline:active:not(:disabled) { background: var(--stamp-tint); }
 
-  .form-footer { margin-top: auto; padding-top: 1.5rem; }
+  .form-footer { margin-top: auto; padding-top: 1.4rem; }
 
-  .exam-list { display: flex; flex-direction: column; gap: .75rem; }
+  /* ── لیست آزمون‌ها ── */
+  .exam-list { display: flex; flex-direction: column; gap: .8rem; }
   .exam-card {
     display: flex;
     align-items: center;
-    gap: .9rem;
-    background: var(--surface);
-    border: 1.5px solid var(--border);
-    border-radius: var(--radius);
-    padding: 1.1rem 1.1rem;
+    gap: .85rem;
+    background: var(--card);
+    border: 1.5px solid var(--ink);
+    border-radius: var(--radius-card);
+    padding: 1.05rem 1.05rem;
     cursor: pointer;
     text-align: right;
-    transition: border-color .15s, transform .12s, box-shadow .15s;
-    animation: cardPop .35s cubic-bezier(.2,.9,.25,1.2) backwards;
+    position: relative;
+    transition: transform .12s, box-shadow .15s;
+    animation: cardStamp .4s cubic-bezier(.2,.9,.25,1.15) backwards;
   }
-  .exam-card:active { transform: scale(0.98); }
-  @keyframes cardPop {
-    from { opacity: 0; transform: translateY(10px) scale(.98); }
-    to   { opacity: 1; transform: translateY(0) scale(1); }
+  .exam-card:active { transform: scale(0.98) rotate(-0.3deg); }
+  @keyframes cardStamp {
+    from { opacity: 0; transform: translateY(10px) scale(.97) rotate(-1deg); }
+    to   { opacity: 1; transform: translateY(0) scale(1) rotate(0); }
   }
-  .exam-icon {
+  .exam-index {
     flex-shrink: 0;
-    width: 46px; height: 46px;
-    border-radius: 12px;
-    background: var(--primary-l);
+    width: 42px; height: 42px;
+    border: 1.5px solid var(--ink);
+    border-radius: 50%;
     display: flex; align-items: center; justify-content: center;
-    font-size: 1.3rem;
+    font-family: var(--serial-font);
+    font-weight: 700;
+    font-size: .95rem;
+    color: var(--ink);
   }
   .exam-info { flex: 1; min-width: 0; }
-  .exam-info h3 { font-size: 1rem; font-weight: 700; margin-bottom: .2rem; }
-  .exam-info p { font-size: .8rem; color: var(--muted); line-height: 1.5; }
-  .exam-meta { font-size: .72rem; color: var(--primary); font-weight: 600; margin-top: .35rem; }
-  .exam-arrow { flex-shrink: 0; color: var(--muted); font-size: 1.1rem; }
+  .exam-info h3 { font-size: 1.02rem; font-weight: 800; margin-bottom: .2rem; }
+  .exam-info p { font-size: .8rem; color: var(--ink-soft); line-height: 1.55; }
+  .exam-meta {
+    font-size: .68rem;
+    font-family: var(--serial-font);
+    color: var(--stamp);
+    font-weight: 700;
+    margin-top: .4rem;
+    letter-spacing: .03em;
+  }
+  .exam-arrow { flex-shrink: 0; color: var(--ink-faint); font-size: 1.2rem; }
 
-  .empty-state { text-align: center; padding: 3rem 1rem; color: var(--muted); }
-  .empty-state .icon { font-size: 2.5rem; margin-bottom: .75rem; }
+  .empty-state { text-align: center; padding: 3rem 1rem; color: var(--ink-soft); }
+  .empty-state .icon { font-size: 2.3rem; margin-bottom: .75rem; opacity: .6; }
 
-  .quiz-topbar { display: flex; align-items: center; gap: .6rem; margin-bottom: 1.25rem; }
+  /* ── نوار بالای آزمون: برگشت + شماره‌ی سؤال به‌سبک مهر ── */
+  .quiz-topbar { display: flex; align-items: center; gap: .7rem; margin-bottom: 1.3rem; }
   .back-btn {
     flex-shrink: 0;
     width: 38px; height: 38px;
-    border-radius: 10px;
-    border: 1.5px solid var(--border);
-    background: var(--surface);
+    border-radius: 50%;
+    border: 1.5px solid var(--ink);
+    background: var(--card);
     display: flex; align-items: center; justify-content: center;
     font-size: 1rem;
     cursor: pointer;
     color: var(--ink);
     transition: background .15s, transform .12s;
   }
-  .back-btn:active { transform: scale(0.93); background: rgba(0,0,0,0.04); }
+  .back-btn:active { transform: scale(0.92); background: var(--stamp-tint); }
 
-  .quiz-progress { display: flex; align-items: center; gap: .75rem; flex: 1; }
-  .progress-track { flex: 1; height: 6px; background: var(--border); border-radius: 999px; overflow: hidden; }
-  .progress-fill { height: 100%; background: var(--primary); border-radius: 999px; transition: width .4s cubic-bezier(.2,.8,.2,1); }
-  .progress-label { font-size: .8rem; font-weight: 700; color: var(--muted); white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .quiz-progress { display: flex; align-items: center; gap: .7rem; flex: 1; }
 
+  .serial-counter {
+    font-family: var(--serial-font);
+    font-size: .82rem;
+    font-weight: 700;
+    color: var(--ink);
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+    border: 1.5px solid var(--ink);
+    border-radius: 3px;
+    padding: .25rem .5rem;
+    background: var(--card);
+  }
+
+  .bubble-track {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    overflow-x: auto;
+    padding: 2px;
+  }
+  .bubble-track::-webkit-scrollbar { display: none; }
+  .bubble-dot {
+    flex-shrink: 0;
+    width: 9px; height: 9px;
+    border-radius: 50%;
+    border: 1.5px solid var(--line);
+    background: transparent;
+    transition: background .2s, border-color .2s, transform .2s;
+  }
+  .bubble-dot.filled { background: var(--graphite); border-color: var(--graphite); }
+  .bubble-dot.current { border-color: var(--stamp); transform: scale(1.35); }
+  .bubble-dot.filled.current { background: var(--stamp); border-color: var(--stamp); }
+
+  /* ── کارت سؤال ── */
   .question-stage { flex: 1; display: flex; flex-direction: column; }
   .question-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 1.5rem 1.25rem;
-    margin-bottom: 1.25rem;
-    animation: questionIn .3s cubic-bezier(.2,.85,.25,1);
+    background: var(--card);
+    border: 1.5px solid var(--ink);
+    border-radius: var(--radius-card);
+    padding: 1.4rem 1.2rem;
+    margin-bottom: 1.3rem;
+    animation: questionDrop .28s cubic-bezier(.2,.85,.25,1);
   }
-  @keyframes questionIn {
-    from { opacity: 0; transform: translateY(8px) scale(.99); }
-    to   { opacity: 1; transform: translateY(0) scale(1); }
+  @keyframes questionDrop {
+    from { opacity: 0; transform: translateY(7px); }
+    to   { opacity: 1; transform: translateY(0); }
   }
   .question-type-tag {
-    display: inline-block;
-    font-size: .68rem;
+    display: inline-flex;
+    align-items: center;
+    gap: .3rem;
+    font-family: var(--serial-font);
+    font-size: .64rem;
     font-weight: 700;
-    color: var(--accent);
-    background: rgba(201,98,42,0.1);
-    padding: .2rem .55rem;
-    border-radius: 999px;
-    margin-bottom: .65rem;
+    letter-spacing: .04em;
+    color: var(--stamp);
+    border: 1px solid var(--stamp);
+    padding: .18rem .5rem;
+    border-radius: var(--radius-pill);
+    margin-bottom: .7rem;
   }
-  .question-text { font-size: 1.08rem; font-weight: 700; line-height: 1.7; }
+  .question-text { font-size: 1.08rem; font-weight: 700; line-height: 1.75; }
 
-  .choices { display: flex; flex-direction: column; gap: .65rem; }
+  /* ── گزینه‌ها به‌سبک حباب پاسخ‌نامه ── */
+  .choices { display: flex; flex-direction: column; gap: .6rem; }
   .choice-btn {
     display: flex;
     align-items: center;
-    gap: .75rem;
+    gap: .8rem;
     width: 100%;
     text-align: right;
-    padding: .9rem 1rem;
-    background: var(--surface);
-    border: 1.5px solid var(--border);
-    border-radius: var(--radius);
-    font-family: inherit;
-    font-size: .92rem;
+    padding: .85rem .95rem;
+    background: var(--card);
+    border: 1.5px solid var(--line);
+    border-radius: var(--radius-card);
+    font-family: 'Vazirmatn', inherit;
+    font-size: .93rem;
     color: var(--ink);
     cursor: pointer;
     transition: border-color .15s, background .15s, transform .1s;
-    animation: choiceIn .3s cubic-bezier(.2,.85,.25,1) backwards;
+    animation: choiceRise .28s cubic-bezier(.2,.85,.25,1) backwards;
   }
-  @keyframes choiceIn {
-    from { opacity: 0; transform: translateY(6px); }
+  @keyframes choiceRise {
+    from { opacity: 0; transform: translateY(5px); }
     to   { opacity: 1; transform: translateY(0); }
   }
   .choice-btn:active { transform: scale(0.99); }
   .choice-marker {
     flex-shrink: 0;
-    width: 26px; height: 26px;
+    width: 25px; height: 25px;
     border-radius: 50%;
-    border: 1.5px solid var(--border);
+    border: 1.5px solid var(--ink-faint);
     display: flex; align-items: center; justify-content: center;
-    font-size: .78rem; font-weight: 700; color: var(--muted);
-    transition: background .15s, border-color .15s, transform .2s;
+    font-family: var(--serial-font);
+    font-size: .68rem; font-weight: 700; color: var(--ink-soft);
+    transition: background .18s, border-color .18s, transform .25s cubic-bezier(.3,1.4,.4,1), color .18s;
+    position: relative;
   }
-  .choice-btn.selected { border-color: var(--primary); background: var(--primary-l); }
-  .choice-btn.selected .choice-marker { border-color: var(--primary); background: var(--primary); color: #fff; transform: scale(1.08); }
+  .choice-btn.selected { border-color: var(--graphite); background: var(--stamp-tint); }
+  .choice-btn.selected .choice-marker {
+    border-color: var(--graphite);
+    background: var(--graphite);
+    color: var(--paper);
+    transform: scale(1.1);
+  }
 
   .essay-box { width: 100%; }
   .essay-box textarea { width: 100%; min-height: 160px; }
-  .essay-counter { font-size: .74rem; color: var(--muted); margin-top: .4rem; text-align: left; }
+  .essay-counter { font-size: .72rem; color: var(--ink-faint); margin-top: .4rem; text-align: left; font-family: var(--serial-font); }
 
-  .quiz-footer { margin-top: 1.25rem; }
+  .quiz-footer { margin-top: 1.2rem; }
 
-  .result-hero { text-align: center; padding: 2rem 1rem 1.5rem; animation: resultPop .5s cubic-bezier(.2,.9,.2,1.1); }
-  @keyframes resultPop {
-    from { opacity: 0; transform: scale(.85); }
-    to   { opacity: 1; transform: scale(1); }
+  /* ── نتیجه: مثل مهر تأیید روی برگه ── */
+  .result-hero { text-align: center; padding: 1.6rem 1rem 1.3rem; animation: stampDown .5s cubic-bezier(.2,.85,.25,1.1); }
+  @keyframes stampDown {
+    from { opacity: 0; transform: scale(1.3) rotate(-6deg); }
+    60%  { opacity: 1; }
+    to   { opacity: 1; transform: scale(1) rotate(-3deg); }
   }
-  .result-icon { font-size: 2.6rem; margin-bottom: .5rem; }
-  .result-score { font-size: 3.2rem; font-weight: 800; color: var(--primary); line-height: 1; font-variant-numeric: tabular-nums; }
-  .result-score span { font-size: 1.4rem; color: var(--muted); font-weight: 600; }
-  .result-label { font-size: .95rem; color: var(--muted); margin-top: .5rem; }
+  .result-seal {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    border: 3px solid var(--stamp);
+    border-radius: 50%;
+    width: 138px; height: 138px;
+    color: var(--stamp);
+    transform: rotate(-3deg);
+    position: relative;
+  }
+  .result-seal::before {
+    content: "";
+    position: absolute;
+    inset: 7px;
+    border: 1px solid var(--stamp);
+    border-radius: 50%;
+  }
+  .result-seal .seal-label {
+    font-family: var(--serial-font);
+    font-size: .58rem;
+    letter-spacing: .06em;
+    margin-top: 14px;
+    font-weight: 700;
+  }
+  .result-seal .seal-score {
+    font-family: var(--serial-font);
+    font-size: 2.1rem;
+    font-weight: 700;
+    line-height: 1;
+    margin-top: 2px;
+  }
+  .result-seal .seal-max {
+    font-size: .85rem;
+    color: var(--stamp);
+    opacity: .75;
+  }
+
   .result-message {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 1.1rem 1.25rem;
-    margin-top: 1.5rem;
+    background: var(--card);
+    border: 1.5px solid var(--line);
+    border-radius: var(--radius-card);
+    padding: 1.05rem 1.2rem;
+    margin-top: 1.4rem;
     font-size: .9rem;
-    line-height: 1.7;
+    line-height: 1.75;
     color: var(--ink);
   }
-  .result-stats { display: flex; gap: .6rem; margin-top: 1rem; }
+  .result-stats { display: flex; gap: .55rem; margin-top: 1rem; }
   .stat-pill {
     flex: 1;
     text-align: center;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: .7rem .4rem;
+    background: var(--card);
+    border: 1.5px solid var(--line);
+    border-radius: var(--radius-card);
+    padding: .65rem .35rem;
   }
-  .stat-pill .num { font-size: 1.15rem; font-weight: 800; font-variant-numeric: tabular-nums; }
-  .stat-pill .lbl { font-size: .68rem; color: var(--muted); margin-top: .15rem; }
-  .stat-pill.correct .num { color: var(--success); }
-  .stat-pill.wrong .num { color: var(--danger); }
+  .stat-pill .num { font-family: var(--serial-font); font-size: 1.1rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .stat-pill .lbl { font-size: .67rem; color: var(--ink-soft); margin-top: .15rem; }
+  .stat-pill.correct { border-color: var(--pass); background: var(--pass-tint); }
+  .stat-pill.correct .num { color: var(--pass); }
+  .stat-pill.wrong { border-color: var(--fail); background: var(--fail-tint); }
+  .stat-pill.wrong .num { color: var(--fail); }
 
+  /* ── بارگذاری ── */
   .spinner {
-    width: 22px; height: 22px;
-    border: 2.5px solid rgba(255,255,255,.35);
-    border-top-color: #fff;
+    width: 20px; height: 20px;
+    border: 2.5px solid rgba(253,248,238,.4);
+    border-top-color: #fdf8ee;
     border-radius: 50%;
     animation: spin .7s linear infinite;
   }
   @keyframes spin { to { transform: rotate(360deg); } }
 
   .page-spinner {
-    width: 30px; height: 30px;
-    border: 3px solid var(--border);
-    border-top-color: var(--primary);
+    width: 28px; height: 28px;
+    border: 3px solid var(--line);
+    border-top-color: var(--stamp);
     border-radius: 50%;
     animation: spin .7s linear infinite;
     margin: 3rem auto;
   }
 
+  /* ── پیام شناور ── */
   #toast {
     position: fixed;
     bottom: 1.5rem;
     left: 50%;
     transform: translateX(-50%) translateY(70px);
     background: var(--ink);
-    color: #fff;
-    padding: .75rem 1.25rem;
-    border-radius: 10px;
-    font-size: .85rem;
+    color: var(--paper);
+    padding: .72rem 1.2rem;
+    border-radius: 4px;
+    font-size: .84rem;
     z-index: 999;
     transition: transform .35s cubic-bezier(.34,1.56,.64,1);
     max-width: 90%;
     text-align: center;
+    border: 1px solid var(--ink);
   }
   #toast.show { transform: translateX(-50%) translateY(0); }
 </style>
@@ -321,10 +496,15 @@
 <div id="app">
 
   <div class="screen active" id="screen-exam-list">
-    <div class="app-header">
-      <div class="eyebrow">آزمون‌های موجود</div>
-      <h1>یک آزمون انتخاب کنید</h1>
-      <p>برای شروع، روی یکی از آزمون‌های زیر بزنید.</p>
+    <div class="letterhead">
+      <div class="letterhead-row">
+        <div>
+          <div class="letterhead-eyebrow">برگه‌ی آزمون · ثبت‌نام</div>
+          <div class="letterhead-title">یک آزمون انتخاب کنید</div>
+          <div class="letterhead-sub">برای شروع، روی یکی از آزمون‌های فهرست‌شده در پایین بزنید.</div>
+        </div>
+        <div class="serial-box">ردیف</div>
+      </div>
     </div>
     <div class="exam-list" id="exam-list-container">
       <div class="page-spinner"></div>
@@ -334,9 +514,9 @@
   <div class="screen" id="screen-register">
     <div class="quiz-topbar">
       <button class="back-btn" id="back-to-list-1">&#8594;</button>
-      <div class="app-header" style="margin-bottom:0; flex:1;">
-        <div class="eyebrow">مرحله ۱ از ۲</div>
-        <h1 style="font-size:1.2rem;" id="register-exam-title">ثبت‌نام در آزمون</h1>
+      <div style="flex:1;">
+        <div class="letterhead-eyebrow" style="margin-bottom:.15rem;">مرحله ۱ از ۲ · ثبت‌نام</div>
+        <div style="font-size:1.12rem; font-weight:800;" id="register-exam-title">ثبت‌نام در آزمون</div>
       </div>
     </div>
 
@@ -372,10 +552,8 @@
     <div class="quiz-topbar">
       <button class="back-btn" id="prev-btn" title="سؤال قبلی">&#8594;</button>
       <div class="quiz-progress">
-        <span class="progress-label" id="progress-label">۱ / ۵</span>
-        <div class="progress-track">
-          <div class="progress-fill" id="progress-fill" style="width:0%"></div>
-        </div>
+        <div class="bubble-track" id="bubble-track"></div>
+        <span class="serial-counter" id="progress-label">۱ / ۵</span>
       </div>
     </div>
 
@@ -402,9 +580,11 @@
 
   <div class="screen" id="screen-result">
     <div class="result-hero">
-      <div class="result-icon" id="result-icon">🎯</div>
-      <div class="result-score" id="result-score">۰<span>/۰</span></div>
-      <div class="result-label">نمره‌ی کسب‌شده</div>
+      <div class="result-seal" id="result-seal">
+        <span class="seal-label">نمره</span>
+        <span class="seal-score" id="result-score">۰</span>
+        <span class="seal-max" id="result-max">از ۰</span>
+      </div>
     </div>
 
     <div class="result-stats" id="result-stats"></div>
@@ -489,8 +669,6 @@ function escapeHtml(str) {
     .replace(/>/g, '&gt;');
 }
 
-const EXAM_ICONS = ['📘', '🧠', '🧪', '📐', '🌍', '⚙️', '📊', '🗒️'];
-
 function loadExamList() {
   fetch('exams.json', { cache: 'no-store' })
     .then(function (res) {
@@ -523,10 +701,10 @@ function renderExamList() {
     card.style.animationDelay = (i * 60) + 'ms';
 
     const qCount = (exam.questions && exam.questions.length) || 0;
-    const icon = EXAM_ICONS[i % EXAM_ICONS.length];
+    const serial = String(i + 1).padStart(2, '0');
 
     card.innerHTML =
-      '<div class="exam-icon">' + icon + '</div>' +
+      '<div class="exam-index">' + toPersianDigits(serial) + '</div>' +
       '<div class="exam-info">' +
         '<h3>' + escapeHtml(exam.title || exam.id) + '</h3>' +
         '<p>' + escapeHtml(exam.description || '') + '</p>' +
@@ -597,7 +775,32 @@ function startQuiz() {
   state.currentIndex = 0;
   state.answers = {};
   showScreen('screen-quiz');
+  renderBubbleTrack();
   renderQuestion();
+}
+
+function renderBubbleTrack() {
+  const track = document.getElementById('bubble-track');
+  track.innerHTML = '';
+  state.currentExam.questions.forEach(function (q, i) {
+    const dot = document.createElement('span');
+    dot.className = 'bubble-dot';
+    dot.dataset.index = i;
+    track.appendChild(dot);
+  });
+}
+
+function updateBubbleTrack() {
+  const dots = document.querySelectorAll('#bubble-track .bubble-dot');
+  state.currentExam.questions.forEach(function (q, i) {
+    const dot = dots[i];
+    if (!dot) return;
+    const qid = String(q.id);
+    const answer = state.answers[qid];
+    const isAnswered = answer !== undefined && !(typeof answer === 'string' && answer.trim() === '');
+    dot.classList.toggle('filled', isAnswered);
+    dot.classList.toggle('current', i === state.currentIndex);
+  });
 }
 
 function renderQuestion() {
@@ -605,8 +808,8 @@ function renderQuestion() {
   const total = state.currentExam.questions.length;
   const current = state.currentIndex + 1;
 
-  document.getElementById('progress-label').textContent = toPersianDigits(current) + ' / ' + toPersianDigits(total);
-  document.getElementById('progress-fill').style.width = ((current / total) * 100) + '%';
+  document.getElementById('progress-label').textContent = toPersianDigits(current) + '/' + toPersianDigits(total);
+  updateBubbleTrack();
 
   const card = document.getElementById('question-card');
   card.style.animation = 'none';
@@ -623,7 +826,7 @@ function renderQuestion() {
   const savedAnswer = state.answers[qid];
 
   if (q.type === 'essay') {
-    typeTag.style.display = 'inline-block';
+    typeTag.style.display = 'inline-flex';
     choicesContainer.style.display = 'none';
     choicesContainer.innerHTML = '';
     essayContainer.style.display = 'block';
@@ -668,6 +871,7 @@ function selectChoice(idx) {
   });
 
   document.getElementById('next-btn').disabled = false;
+  updateBubbleTrack();
 }
 
 document.getElementById('essay-textarea').addEventListener('input', function () {
@@ -676,6 +880,7 @@ document.getElementById('essay-textarea').addEventListener('input', function () 
   const qid = String(q.id);
   state.answers[qid] = this.value;
   document.getElementById('next-btn').disabled = this.value.trim().length === 0;
+  updateBubbleTrack();
 });
 
 function updateEssayCounter() {
@@ -752,8 +957,8 @@ function computeLocalScore() {
 function finishQuiz() {
   const result = computeLocalScore();
 
-  document.getElementById('result-score').innerHTML =
-    toPersianDigits(result.score) + '<span>/' + toPersianDigits(result.maxScore) + '</span>';
+  document.getElementById('result-score').textContent = toPersianDigits(result.score);
+  document.getElementById('result-max').textContent = 'از ' + toPersianDigits(result.maxScore);
 
   const statsContainer = document.getElementById('result-stats');
   statsContainer.innerHTML =
@@ -762,22 +967,22 @@ function finishQuiz() {
     '<div class="stat-pill"><div class="num">' + toPersianDigits(result.unanswered) + '</div><div class="lbl">بی‌پاسخ</div></div>';
 
   const ratio = result.maxScore > 0 ? result.score / result.maxScore : 0;
-  let message, icon;
+  let message, sealLabel;
   if (result.hasEssay) {
-    icon = '📝';
+    sealLabel = 'در انتظار بررسی';
     message = 'این نمره بدون درنظرگرفتن پاسخ(های) تشریحی است. نمره‌ی نهایی پس از بررسی توسط مدیر، در همین چت ربات به شما اعلام خواهد شد.';
   } else if (ratio >= 0.8) {
-    icon = '🎉';
+    sealLabel = 'قبول · عالی';
     message = 'عملکرد عالی! تبریک می‌گوییم.';
   } else if (ratio >= 0.5) {
-    icon = '👍';
+    sealLabel = 'قبول';
     message = 'عملکرد خوبی داشتید.';
   } else {
-    icon = '📚';
+    sealLabel = 'نیاز به مرور';
     message = 'پیشنهاد می‌شود مطالب را دوباره مرور کنید.';
   }
 
-  document.getElementById('result-icon').textContent = icon;
+  document.querySelector('#result-seal .seal-label').textContent = sealLabel;
   document.getElementById('result-message').textContent = message;
 
   showScreen('screen-result');
